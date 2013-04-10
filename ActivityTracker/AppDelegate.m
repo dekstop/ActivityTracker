@@ -115,8 +115,10 @@ NSFileHandle *logFile;
 - (void)doTrackCurrentActivity
 {
     NSArray *activity = [self askForCurrentActivityWithDefault:previousActivity];
-    Log(@"%@", [activity componentsJoinedByString:@", "]);
-    previousActivity = activity;
+    if (activity!=nil) {
+        Log(@"%@", [activity componentsJoinedByString:@", "]);
+        previousActivity = activity;
+    }
     [self scheduleReminderNotificationAfter:reminderIntervalInSeconds]; // Schedule the next reminder
 }
 
