@@ -1,0 +1,4 @@
+* make menu options work (reminder interval selection)
+* retain tags across sessions
+* assign colours to tags (to e.g. distinguish activities and location tags)
+* show clickable list of previous tags
