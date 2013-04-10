@@ -14,7 +14,8 @@
 NSAttributedString *menuTitleActive = nil;
 NSAttributedString *menuTitleInactive = nil;
 
-NSString *previousActivity = @"Nothing";
+NSMutableSet *allActivities = nil;
+NSArray *previousActivity = nil;
 
 NSString *logFilePath;
 NSDateFormatter *dateFormatter;
@@ -22,6 +23,9 @@ NSFileHandle *logFile;
 
 - (id)init {
     if (self = [super init]) {
+        allActivities = [[NSMutableSet alloc] init];
+        previousActivity = [NSArray arrayWithObject:@"Nothing"];
+        
         dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss"];
         logFilePath = [NSString stringWithFormat:@"%@/Library/Logs/ActivityTracker.log", NSHomeDirectory()];
@@ -99,18 +103,24 @@ NSFileHandle *logFile;
     
     // Notifications
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
-    [self scheduleReminderNotificationAfter:reminderIntervalInSeconds];
+    [self scheduleReminderNotificationAfter:reminderIntervalInSeconds]; // Schedule the first reminder
 }
+
+/**
+ *
+ * Editing controls.
+ *
+ **/
 
 - (void)doTrackCurrentActivity
 {
-    NSString *activity = [self askForCurrentActivityWithDefault:previousActivity];
-    Log(@"%@", activity);
+    NSArray *activity = [self askForCurrentActivityWithDefault:previousActivity];
+    Log(@"%@", [activity componentsJoinedByString:@", "]);
     previousActivity = activity;
     [self scheduleReminderNotificationAfter:reminderIntervalInSeconds]; // Schedule the next reminder
 }
 
-- (NSString*)askForCurrentActivityWithDefault:(NSString*)defaultValue
+- (NSArray*)askForCurrentActivityWithDefault:(NSArray*)defaultValue
 {
     NSAlert *alert = [NSAlert alertWithMessageText:@"What are you currently doing?"
                                      defaultButton:@"Track"
@@ -118,22 +128,39 @@ NSFileHandle *logFile;
                                        otherButton:nil
                          informativeTextWithFormat:@""];
     
-    NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
-    [input setStringValue:defaultValue];
+    NSTokenField *input = [[NSTokenField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
+//    [input setStringValue:defaultValue];
+    [input setObjectValue:defaultValue];
+    [input setDelegate:self];
+
     [alert setAccessoryView:input];
+    [input setTarget:alert];
     
     NSInteger button = [alert runModal];
     if (button == NSAlertDefaultReturn) {
         [input validateEditing];
-        return [input stringValue];
+        [allActivities addObjectsFromArray:[input objectValue]]; // Update autocomplete history
+//        return [input stringValue];
+        return [input objectValue];
     } else {
         return nil;
     }
 }
 
+// NSTokenFieldDelegate: autocomplete
+- (NSArray *)tokenField:(NSTokenField *)tokenField completionsForSubstring:(NSString *)substring indexOfToken:(NSInteger)tokenIndex indexOfSelectedItem:(NSInteger *)selectedIndex
+{
+//    *selectedIndex = -1; // don't pre-select any option
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF beginswith[cd] %@", substring];
+    NSMutableSet *matchingActivities = [allActivities mutableCopy];
+    [matchingActivities filterUsingPredicate:predicate];
+    return [matchingActivities allObjects];
+}
+
 /**
  *
  * Tools: user notifications.
+ *
  */
 
 - (void)scheduleReminderNotificationAfter:(NSInteger)seconds
@@ -150,10 +177,10 @@ NSFileHandle *logFile;
     NSLog(@"Next reminder: %@", deliveryDate);
     [notification setDeliveryDate:deliveryDate];
 
-    // TODO: make sticky
     [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:notification];
 }
 
+// NSUserNotificationCenterDelegate
 - (void)userNotificationCenter:(NSUserNotificationCenter *)center didActivateNotification:(NSUserNotification *)notification
 {
     [[NSUserNotificationCenter defaultUserNotificationCenter] removeAllDeliveredNotifications];
@@ -168,6 +195,7 @@ NSFileHandle *logFile;
     }
 }
 
+// NSUserNotificationCenterDelegate
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center
      shouldPresentNotification:(NSUserNotification *)notification
 {
