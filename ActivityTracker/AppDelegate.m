@@ -109,8 +109,9 @@ NSFileHandle *logFile;
     [self updateIsActiveDisplay];
     
     // Register global keyboard shortcut -- may require assistive device access.
-    [NSEvent addGlobalMonitorForEventsMatchingMask:(NSKeyUpMask) handler:^(NSEvent *event){
-        NSUInteger modifierFlags = [event modifierFlags] & NSCommandKeyMask;
+    [NSEvent addGlobalMonitorForEventsMatchingMask:NSKeyDownMask handler:^(NSEvent *event){
+        NSUInteger modifierKeyMask = NSCommandKeyMask | NSShiftKeyMask | NSAlternateKeyMask | NSControlKeyMask | NSFunctionKeyMask;
+        NSUInteger modifierFlags = [event modifierFlags] & modifierKeyMask;
         unsigned short keyCode = [event keyCode];
         if (modifierFlags == NSCommandKeyMask && keyCode == kVK_ISO_Section) {
             [self doTrackCurrentActivity];
@@ -120,6 +121,9 @@ NSFileHandle *logFile;
     // Notifications
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
     [self scheduleReminderNotificationAfter:reminderIntervalInSeconds]; // Schedule the first reminder
+
+    // Lose focus
+    [self loseApplicationFocus]; // For some reason this gets ignored.
 }
 
 - (void)syncAppSettings
@@ -136,6 +140,14 @@ NSFileHandle *logFile;
 {
     [self syncAppSettings];
     CloseLog();
+}
+
+// Give up application focus to make global event monitor work (for keyboard shortcuts)
+- (void) loseApplicationFocus
+{
+//    [[NSApplication sharedApplication] deactivate];
+    [[NSApplication sharedApplication] hide:nil];
+    [[NSApplication sharedApplication] unhideWithoutActivation];
 }
 
 /**
@@ -172,6 +184,8 @@ NSFileHandle *logFile;
     [input setTarget:alert];
     
     NSInteger button = [alert runModal];
+    [self loseApplicationFocus];
+
     if (button == NSAlertDefaultReturn) {
         [input validateEditing];
         [allActivities addObjectsFromArray:[input objectValue]]; // Update autocomplete history
