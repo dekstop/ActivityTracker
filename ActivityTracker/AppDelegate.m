@@ -24,7 +24,7 @@ NSFileHandle *logFile;
 - (id)init {
     if (self = [super init]) {
         allActivities = [[NSMutableSet alloc] init];
-        previousActivity = [NSArray arrayWithObject:@"Nothing"];
+        previousActivity = [[NSArray alloc] init];
         
         dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss"];
@@ -87,12 +87,17 @@ NSFileHandle *logFile;
     NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
                                  @"YES", @"isActive",
                                  [NSNumber numberWithInt:(30*60)], @"reminderIntervalInSeconds",
+                                 [[NSArray alloc] init], @"allActivities",
+                                 [[NSArray alloc] init], @"previousActivity",
                                  nil];
     [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
     
     isActive = [[NSUserDefaults standardUserDefaults] boolForKey:@"isActive"];
     reminderIntervalInSeconds = [[NSUserDefaults standardUserDefaults] integerForKey:@"reminderIntervalInSeconds"];
     NSLog(@"Reminder interval: %f", reminderIntervalInSeconds);
+    [allActivities addObjectsFromArray:[[NSUserDefaults standardUserDefaults] arrayForKey:@"allActivities"]];
+    previousActivity = [[NSUserDefaults standardUserDefaults] arrayForKey:@"previousActivity"];
+
     [launchOnStartupMenuItem setState:([self isLoginItem] ? NSOnState : NSOffState)];
     
     // Status bar / tray icon
@@ -104,6 +109,22 @@ NSFileHandle *logFile;
     // Notifications
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
     [self scheduleReminderNotificationAfter:reminderIntervalInSeconds]; // Schedule the first reminder
+}
+
+- (void)syncAppSettings
+{
+    NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+    [settings setBool:isActive forKey:@"isActive"];
+    [settings setInteger:reminderIntervalInSeconds forKey:@"reminderIntervalInSeconds"];
+    [settings setObject:[allActivities allObjects] forKey:@"allActivities"];
+    [settings setObject:previousActivity forKey:@"previousActivity"];
+    [settings synchronize];
+}
+
+- (void)applicationWillTerminate:(NSNotification *)aNotification
+{
+    [self syncAppSettings];
+    CloseLog();
 }
 
 /**
@@ -242,7 +263,7 @@ void Log(NSString* format, ...)
     [logFile synchronizeFile];
 }
 
-- (void)applicationWillTerminate:(NSNotification *)aNotification
+void CloseLog()
 {
     [logFile closeFile];
 }
