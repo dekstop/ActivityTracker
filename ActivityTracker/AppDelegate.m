@@ -135,6 +135,7 @@ NSFileHandle *logFile;
     [input setObjectValue:defaultValue];
     [input setDelegate:self];
 
+    [NSApp activateIgnoringOtherApps:YES];
     [alert setAccessoryView:input];
     [input setTarget:alert];
     
