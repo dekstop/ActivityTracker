@@ -149,9 +149,9 @@ NSFileHandle *logFile;
                                      defaultButton:@"Track"
                                    alternateButton:@"Cancel"
                                        otherButton:nil
-                         informativeTextWithFormat:@""];
+                         informativeTextWithFormat:@"Use short comma-separated tags to describe activities, your location, your mood, or anything else that relates to your current context. These tags are logged in a file so you can refer to them later."];
     
-    NSTokenField *input = [[NSTokenField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
+    NSTokenField *input = [[NSTokenField alloc] initWithFrame:NSMakeRect(0, 0, 400, 72)];
 //    [input setStringValue:defaultValue];
     [input setObjectValue:defaultValue];
     [input setDelegate:self];
