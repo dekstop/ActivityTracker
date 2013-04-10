@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1A2BB0E81715DE8F00328624 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A2BB0E71715DE8F00328624 /* Carbon.framework */; };
 		1AEA33681714FA5500C64479 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1AEA33671714FA5500C64479 /* Cocoa.framework */; };
 		1AEA33721714FA5500C64479 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1AEA33701714FA5500C64479 /* InfoPlist.strings */; };
 		1AEA33741714FA5500C64479 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1AEA33731714FA5500C64479 /* main.m */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1A2BB0E71715DE8F00328624 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		1AEA33641714FA5500C64479 /* ActivityTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ActivityTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1AEA33671714FA5500C64479 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		1AEA336A1714FA5500C64479 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -36,6 +38,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1A2BB0E81715DE8F00328624 /* Carbon.framework in Frameworks */,
 				1AEA33681714FA5500C64479 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -46,6 +49,7 @@
 		1AEA335B1714FA5500C64479 = {
 			isa = PBXGroup;
 			children = (
+				1A2BB0E71715DE8F00328624 /* Carbon.framework */,
 				1AEA336D1714FA5500C64479 /* ActivityTracker */,
 				1AEA33661714FA5500C64479 /* Frameworks */,
 				1AEA33651714FA5500C64479 /* Products */,
@@ -303,6 +307,7 @@
 				1AEA33831714FA5500C64479 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

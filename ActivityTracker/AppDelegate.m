@@ -8,6 +8,8 @@
 
 #import "AppDelegate.h"
 
+#import <Carbon/Carbon.h>
+
 @implementation AppDelegate
 
 @synthesize isActive;
@@ -105,6 +107,15 @@ NSFileHandle *logFile;
     [statusItem setMenu:statusMenu];
     [statusItem setHighlightMode:YES];
     [self updateIsActiveDisplay];
+    
+    // Register global keyboard shortcut -- may require assistive device access.
+    [NSEvent addGlobalMonitorForEventsMatchingMask:(NSKeyUpMask) handler:^(NSEvent *event){
+        NSUInteger modifierFlags = [event modifierFlags] & NSCommandKeyMask;
+        unsigned short keyCode = [event keyCode];
+        if (modifierFlags == NSCommandKeyMask && keyCode == kVK_ISO_Section) {
+            [self doTrackCurrentActivity];
+        }
+    }];
     
     // Notifications
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
