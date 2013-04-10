@@ -8,8 +8,22 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, NSUserNotificationCenterDelegate> {
+    IBOutlet NSMenu *statusMenu;
+    NSStatusItem *statusItem;
+    
+    BOOL isActive;
+    NSTimeInterval reminderIntervalInSeconds;
+    IBOutlet NSMenuItem *isActiveMenuItem;
+    IBOutlet NSMenuItem *launchOnStartupMenuItem;
+}
 
-@property (assign) IBOutlet NSWindow *window;
+@property BOOL isActive;
+- (IBAction)toggleIsActive:(id)pId;
+- (IBAction)toggleLaunchOnStartup:(id)pId;
+- (IBAction)trackNow:(id)pId;
+- (IBAction)openLog:(id)pId;
+- (IBAction)about:(id)pId;
+- (IBAction)quit:(id)pId;
 
 @end

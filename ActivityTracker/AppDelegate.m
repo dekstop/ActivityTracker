@@ -10,9 +10,283 @@
 
 @implementation AppDelegate
 
+@synthesize isActive;
+NSAttributedString *menuTitleActive = nil;
+NSAttributedString *menuTitleInactive = nil;
+
+NSString *previousActivity = @"Nothing";
+
+NSString *logFilePath;
+NSDateFormatter *dateFormatter;
+NSFileHandle *logFile;
+
+- (id)init {
+    if (self = [super init]) {
+        dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss"];
+        logFilePath = [NSString stringWithFormat:@"%@/Library/Logs/ActivityTracker.log", NSHomeDirectory()];
+        logFile = OpenUserLog(logFilePath);
+        
+        menuTitleActive = [[NSMutableAttributedString alloc] initWithString:@"A" attributes:@{NSForegroundColorAttributeName:[NSColor blackColor], NSFontAttributeName:[NSFont systemFontOfSize:14.0]}];
+        menuTitleInactive = [[NSMutableAttributedString alloc] initWithString:@"A" attributes:@{NSForegroundColorAttributeName:[NSColor grayColor], NSFontAttributeName:[NSFont systemFontOfSize:14.0]}];
+    }
+    return self;
+}
+
+- (IBAction)toggleIsActive:(id)pId
+{
+    isActive = !isActive;
+    [[NSUserDefaults standardUserDefaults] setBool:isActive forKey:@"isActive"];
+    [self updateIsActiveDisplay];
+}
+
+- (void)updateIsActiveDisplay
+{
+    [isActiveMenuItem setState:(isActive ? NSOnState : NSOffState)];
+    [statusItem setAttributedTitle:(isActive ? menuTitleActive : menuTitleInactive)];
+}
+
+- (IBAction)trackNow:(id)pId
+{
+    [self doTrackCurrentActivity];
+}
+
+- (IBAction)openLog:(id)pId
+{
+    [[NSWorkspace sharedWorkspace] openFile:logFilePath];
+}
+
+- (IBAction)toggleLaunchOnStartup:(id)pId
+{
+    if ([self isLoginItem]) {
+        [self removeAsLoginItem];
+        [launchOnStartupMenuItem setState:NSOffState];
+    } else {
+        [self addAsLoginItem];
+        [launchOnStartupMenuItem setState:NSOnState];
+    }
+}
+
+- (IBAction)about:(id)pId
+{
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/dekstop/ActivityTracker"]];
+}
+
+- (IBAction)quit:(id)pId
+{
+    [NSApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    // Insert code here to initialize your application
+    // App preferences
+    NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
+                                 @"YES", @"isActive",
+                                 [NSNumber numberWithInt:(30*60)], @"reminderIntervalInSeconds",
+                                 nil];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+    
+    isActive = [[NSUserDefaults standardUserDefaults] boolForKey:@"isActive"];
+    reminderIntervalInSeconds = [[NSUserDefaults standardUserDefaults] integerForKey:@"reminderIntervalInSeconds"];
+    NSLog(@"Reminder interval: %f", reminderIntervalInSeconds);
+    [launchOnStartupMenuItem setState:([self isLoginItem] ? NSOnState : NSOffState)];
+    
+    // Status bar / tray icon
+    statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
+    [statusItem setMenu:statusMenu];
+    [statusItem setHighlightMode:YES];
+    [self updateIsActiveDisplay];
+    
+    // Notifications
+    [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
+    [self scheduleReminderNotificationAfter:reminderIntervalInSeconds];
+}
+
+- (void)doTrackCurrentActivity
+{
+    NSString *activity = [self askForCurrentActivityWithDefault:previousActivity];
+    Log(@"%@", activity);
+    previousActivity = activity;
+    [self scheduleReminderNotificationAfter:reminderIntervalInSeconds]; // Schedule the next reminder
+}
+
+- (NSString*)askForCurrentActivityWithDefault:(NSString*)defaultValue
+{
+    NSAlert *alert = [NSAlert alertWithMessageText:@"What are you currently doing?"
+                                     defaultButton:@"Track"
+                                   alternateButton:@"Cancel"
+                                       otherButton:nil
+                         informativeTextWithFormat:@""];
+    
+    NSTextField *input = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
+    [input setStringValue:defaultValue];
+    [alert setAccessoryView:input];
+    
+    NSInteger button = [alert runModal];
+    if (button == NSAlertDefaultReturn) {
+        [input validateEditing];
+        return [input stringValue];
+    } else {
+        return nil;
+    }
+}
+
+/**
+ *
+ * Tools: user notifications.
+ */
+
+- (void)scheduleReminderNotificationAfter:(NSInteger)seconds
+{
+    [self removeAllScheduledNotifications]; // Only one scheduled notification at a time
+
+    NSUserNotification *notification = [[NSUserNotification alloc] init];
+    [notification setTitle:@"ActivityTracker"];
+    [notification setInformativeText:[NSString stringWithFormat:@"What are you currently doing?"]];
+    [notification setHasActionButton:TRUE];
+    [notification setActionButtonTitle:@"Track"];
+
+    NSDate *deliveryDate = [NSDate dateWithTimeIntervalSinceNow:seconds];
+    NSLog(@"Next reminder: %@", deliveryDate);
+    [notification setDeliveryDate:deliveryDate];
+
+    // TODO: make sticky
+    [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:notification];
+}
+
+- (void)userNotificationCenter:(NSUserNotificationCenter *)center didActivateNotification:(NSUserNotification *)notification
+{
+    [[NSUserNotificationCenter defaultUserNotificationCenter] removeAllDeliveredNotifications];
+    [self doTrackCurrentActivity];
+}
+
+- (void)removeAllScheduledNotifications
+{
+    NSUserNotificationCenter *center = [NSUserNotificationCenter defaultUserNotificationCenter];
+    for (NSUserNotification *notification in [center scheduledNotifications]) {
+        [center removeScheduledNotification:notification];
+    }
+}
+
+- (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center
+     shouldPresentNotification:(NSUserNotification *)notification
+{
+    return YES;
+}
+
+/**
+ *
+ * Tools: logging.
+ *
+ **/
+
+NSFileHandle *OpenUserLog(NSString *logFilePath)
+{
+    NSFileHandle *logFile;
+    NSFileManager * mFileManager = [NSFileManager defaultManager];
+    if([mFileManager fileExistsAtPath:logFilePath] == NO) {
+        [mFileManager createFileAtPath:logFilePath contents:nil attributes:nil];
+    }
+    logFile = [NSFileHandle fileHandleForWritingAtPath:logFilePath];
+    [logFile seekToEndOfFile];
+    return logFile;
+}
+
+void Log(NSString* format, ...)
+{
+    // Build string
+    va_list argList;
+    va_start(argList, format);
+    NSString* formattedMessage = [[NSString alloc] initWithFormat:format arguments:argList];
+    va_end(argList);
+    
+    // Console
+    //    NSLog(@"%@", formattedMessage);
+    
+    // File logging
+    NSString *logMessage = [NSString stringWithFormat:@"%@ %@\n",
+                            [dateFormatter stringFromDate:[NSDate date]],
+                            formattedMessage];
+    [logFile writeData:[logMessage dataUsingEncoding:NSUTF8StringEncoding]];
+    [logFile synchronizeFile];
+}
+
+- (void)applicationWillTerminate:(NSNotification *)aNotification
+{
+    [logFile closeFile];
+}
+
+/**
+ *
+ * Tools: add/remove login item.
+ * Based on https://gist.github.com/boyvanamstel/1409312 (MIT license)
+ *
+ **/
+
+- (BOOL)isLoginItem {
+    // See if the app is currently in LoginItems.
+    LSSharedFileListItemRef itemRef = [self itemRefInLoginItems];
+    // Store away that boolean.
+    BOOL isInList = itemRef != nil;
+    // Release the reference if it exists.
+    if (itemRef != nil) CFRelease(itemRef);
+    
+    return isInList;
+}
+
+- (void)addAsLoginItem {
+    // Get the LoginItems list.
+    LSSharedFileListRef loginItemsRef = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
+    if (loginItemsRef == nil) return;
+    
+    // Add the app to the LoginItems list.
+    CFURLRef appUrl = (__bridge CFURLRef)[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]];
+    LSSharedFileListItemRef itemRef = LSSharedFileListInsertItemURL(loginItemsRef, kLSSharedFileListItemLast, NULL, NULL, appUrl, NULL, NULL);
+    if (itemRef) CFRelease(itemRef);
+}
+
+- (void)removeAsLoginItem {
+    // Get the LoginItems list.
+    LSSharedFileListRef loginItemsRef = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
+    if (loginItemsRef == nil) return;
+    
+    // Remove the app from the LoginItems list.
+    LSSharedFileListItemRef itemRef = [self itemRefInLoginItems];
+    LSSharedFileListItemRemove(loginItemsRef,itemRef);
+    //    if (itemRef != nil) CFRelease(itemRef);
+}
+
+- (LSSharedFileListItemRef)itemRefInLoginItems {
+    LSSharedFileListItemRef itemRef = nil;
+    
+	NSString * appPath = [[NSBundle mainBundle] bundlePath];
+    
+	// This will retrieve the path for the application
+	// For example, /Applications/test.app
+	CFURLRef url = (__bridge CFURLRef)[NSURL fileURLWithPath:appPath];
+    
+	// Create a reference to the shared file list.
+	LSSharedFileListRef loginItems = LSSharedFileListCreate(NULL, kLSSharedFileListSessionLoginItems, NULL);
+    
+	if (loginItems) {
+		UInt32 seedValue;
+		//Retrieve the list of Login Items and cast them to
+		// a NSArray so that it will be easier to iterate.
+		NSArray  *loginItemsArray = (__bridge NSArray *)LSSharedFileListCopySnapshot(loginItems, &seedValue);
+		for(int i = 0; i< [loginItemsArray count]; i++){
+			LSSharedFileListItemRef currentItemRef = (__bridge LSSharedFileListItemRef)[loginItemsArray
+                                                                                        objectAtIndex:i];
+			//Resolve the item with URL
+			if (LSSharedFileListItemResolve(currentItemRef, 0, (CFURLRef*) &url, NULL) == noErr) {
+				NSString * urlPath = [(__bridge NSURL*)url path];
+				if ([urlPath compare:appPath] == NSOrderedSame){
+                    itemRef = currentItemRef;
+				}
+			}
+		}
+        CFRelease(loginItems);
+	}
+    return itemRef;
 }
 
 @end
