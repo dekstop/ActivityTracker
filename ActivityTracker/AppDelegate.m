@@ -143,7 +143,7 @@ NSFileHandle *logFile;
 }
 
 // Give up application focus to make global event monitor work (for keyboard shortcuts)
-- (void) loseApplicationFocus
+- (void)loseApplicationFocus
 {
 //    [[NSApplication sharedApplication] deactivate];
     [[NSApplication sharedApplication] hide:nil];
@@ -175,7 +175,6 @@ NSFileHandle *logFile;
                          informativeTextWithFormat:@"Use short comma-separated tags to describe activities, your location, your mood, or anything else that relates to your current context. These tags are logged in a file so you can refer to them later."];
     
     NSTokenField *input = [[NSTokenField alloc] initWithFrame:NSMakeRect(0, 0, 400, 72)];
-//    [input setStringValue:defaultValue];
     [input setObjectValue:defaultValue];
     [input setDelegate:self];
 
@@ -189,7 +188,7 @@ NSFileHandle *logFile;
     if (button == NSAlertDefaultReturn) {
         [input validateEditing];
         [allActivities addObjectsFromArray:[input objectValue]]; // Update autocomplete history
-//        return [input stringValue];
+        [self syncAppSettings]; // Write to disk
         return [input objectValue];
     } else {
         return nil;
