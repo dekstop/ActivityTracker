@@ -1,0 +1,17 @@
+
+== ActivityTracker
+
+A simple OS X utility that helps you keep track of how you spend your time.
+
+Martin Dittus, 2013
+@dekstop
+
+
+== Installation
+
+Get the source here:
+https://github.com/dekstop/ActivityTracker
+
+Compile, run.
+
+Only tested with Xcode 4.6 on OS X 10.8
