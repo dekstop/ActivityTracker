@@ -86,19 +86,13 @@ NSFileHandle *logFile;
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     // App preferences
-    NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
-                                 @"YES", @"isActive",
-                                 [NSNumber numberWithInt:(30*60)], @"reminderIntervalInSeconds",
-                                 [[NSArray alloc] init], @"allActivities",
-                                 [[NSArray alloc] init], @"previousActivity",
-                                 nil];
-    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
-    
+    [self registerDefaultAppSettings];
     isActive = [[NSUserDefaults standardUserDefaults] boolForKey:@"isActive"];
     reminderIntervalInSeconds = [[NSUserDefaults standardUserDefaults] integerForKey:@"reminderIntervalInSeconds"];
     NSLog(@"Reminder interval: %f", reminderIntervalInSeconds);
     [allActivities addObjectsFromArray:[[NSUserDefaults standardUserDefaults] arrayForKey:@"allActivities"]];
     previousActivity = [[NSUserDefaults standardUserDefaults] arrayForKey:@"previousActivity"];
+    [self updateAppSettings];
 
     [launchOnStartupMenuItem setState:([self isLoginItem] ? NSOnState : NSOffState)];
     
@@ -126,14 +120,30 @@ NSFileHandle *logFile;
     [self loseApplicationFocus]; // For some reason this gets ignored.
 }
 
-- (void)syncAppSettings
+- (void)registerDefaultAppSettings
+{
+    NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
+                                 @"YES", @"isActive",
+                                 [NSNumber numberWithInt:(30*60)], @"reminderIntervalInSeconds",
+                                 [[NSArray alloc] init], @"allActivities",
+                                 [[NSArray alloc] init], @"previousActivity",
+                                 nil];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+}
+
+- (void)updateAppSettings
 {
     NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
     [settings setBool:isActive forKey:@"isActive"];
     [settings setInteger:reminderIntervalInSeconds forKey:@"reminderIntervalInSeconds"];
     [settings setObject:[allActivities allObjects] forKey:@"allActivities"];
     [settings setObject:previousActivity forKey:@"previousActivity"];
-    [settings synchronize];
+}
+
+- (void)syncAppSettings
+{
+    [self updateAppSettings];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification
@@ -162,6 +172,7 @@ NSFileHandle *logFile;
     if (activity!=nil) {
         Log(@"%@", [activity componentsJoinedByString:@", "]);
         previousActivity = activity;
+        [self syncAppSettings]; // Write history to disk
     }
     [self scheduleReminderNotificationAfter:reminderIntervalInSeconds]; // Schedule the next reminder
 }
@@ -188,7 +199,6 @@ NSFileHandle *logFile;
     if (button == NSAlertDefaultReturn) {
         [input validateEditing];
         [allActivities addObjectsFromArray:[input objectValue]]; // Update autocomplete history
-        [self syncAppSettings]; // Write to disk
         return [input objectValue];
     } else {
         return nil;
@@ -200,7 +210,7 @@ NSFileHandle *logFile;
 {
 //    *selectedIndex = -1; // don't pre-select any option
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF beginswith[cd] %@", substring];
-    NSMutableSet *matchingActivities = [allActivities mutableCopy];
+    NSMutableSet *matchingActivities = [allActivities mutableCopy]; // Load autocomplete history
     [matchingActivities filterUsingPredicate:predicate];
     return [matchingActivities allObjects];
 }
