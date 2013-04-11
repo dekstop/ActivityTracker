@@ -204,14 +204,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
-						<string key="label">toggleIsActive:</string>
-						<reference key="source" ref="976324537"/>
-						<reference key="destination" ref="975106716"/>
-					</object>
-					<int key="connectionID">555</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
 						<string key="label">toggleLaunchOnStartup:</string>
 						<reference key="source" ref="976324537"/>
 						<reference key="destination" ref="77941037"/>
@@ -236,11 +228,83 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
-						<string key="label">isActiveMenuItem</string>
+						<string key="label">dontRemindMenuItem</string>
 						<reference key="source" ref="976324537"/>
 						<reference key="destination" ref="975106716"/>
 					</object>
-					<int key="connectionID">560</int>
+					<int key="connectionID">561</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">remindPeriod1MenuItem</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="626918766"/>
+					</object>
+					<int key="connectionID">562</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">remindPeriod2MenuItem</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="321098572"/>
+					</object>
+					<int key="connectionID">563</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">remindPeriod3MenuItem</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="207884570"/>
+					</object>
+					<int key="connectionID">564</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">remindPeriod4MenuItem</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="357096485"/>
+					</object>
+					<int key="connectionID">565</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectDontRemind:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="975106716"/>
+					</object>
+					<int key="connectionID">566</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectRemindPeriod1:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="626918766"/>
+					</object>
+					<int key="connectionID">567</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectRemindPeriod2:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="321098572"/>
+					</object>
+					<int key="connectionID">568</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectRemindPeriod3:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="207884570"/>
+					</object>
+					<int key="connectionID">569</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectRemindPeriod4:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="357096485"/>
+					</object>
+					<int key="connectionID">570</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -391,7 +455,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">560</int>
+			<int key="maxID">570</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -402,7 +466,11 @@
 						<string key="about:">id</string>
 						<string key="openLog:">id</string>
 						<string key="quit:">id</string>
-						<string key="toggleIsActive:">id</string>
+						<string key="selectDontRemind:">id</string>
+						<string key="selectRemindPeriod1:">id</string>
+						<string key="selectRemindPeriod2:">id</string>
+						<string key="selectRemindPeriod3:">id</string>
+						<string key="selectRemindPeriod4:">id</string>
 						<string key="toggleLaunchOnStartup:">id</string>
 						<string key="trackNow:">id</string>
 					</dictionary>
@@ -419,8 +487,24 @@
 							<string key="name">quit:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-						<object class="IBActionInfo" key="toggleIsActive:">
-							<string key="name">toggleIsActive:</string>
+						<object class="IBActionInfo" key="selectDontRemind:">
+							<string key="name">selectDontRemind:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="selectRemindPeriod1:">
+							<string key="name">selectRemindPeriod1:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="selectRemindPeriod2:">
+							<string key="name">selectRemindPeriod2:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="selectRemindPeriod3:">
+							<string key="name">selectRemindPeriod3:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="selectRemindPeriod4:">
+							<string key="name">selectRemindPeriod4:</string>
 							<string key="candidateClassName">id</string>
 						</object>
 						<object class="IBActionInfo" key="toggleLaunchOnStartup:">
@@ -433,17 +517,37 @@
 						</object>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
-						<string key="isActiveMenuItem">NSMenuItem</string>
+						<string key="dontRemindMenuItem">NSMenuItem</string>
 						<string key="launchOnStartupMenuItem">NSMenuItem</string>
+						<string key="remindPeriod1MenuItem">NSMenuItem</string>
+						<string key="remindPeriod2MenuItem">NSMenuItem</string>
+						<string key="remindPeriod3MenuItem">NSMenuItem</string>
+						<string key="remindPeriod4MenuItem">NSMenuItem</string>
 						<string key="statusMenu">NSMenu</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<object class="IBToOneOutletInfo" key="isActiveMenuItem">
-							<string key="name">isActiveMenuItem</string>
+						<object class="IBToOneOutletInfo" key="dontRemindMenuItem">
+							<string key="name">dontRemindMenuItem</string>
 							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="launchOnStartupMenuItem">
 							<string key="name">launchOnStartupMenuItem</string>
+							<string key="candidateClassName">NSMenuItem</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="remindPeriod1MenuItem">
+							<string key="name">remindPeriod1MenuItem</string>
+							<string key="candidateClassName">NSMenuItem</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="remindPeriod2MenuItem">
+							<string key="name">remindPeriod2MenuItem</string>
+							<string key="candidateClassName">NSMenuItem</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="remindPeriod3MenuItem">
+							<string key="name">remindPeriod3MenuItem</string>
+							<string key="candidateClassName">NSMenuItem</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="remindPeriod4MenuItem">
+							<string key="name">remindPeriod4MenuItem</string>
 							<string key="candidateClassName">NSMenuItem</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="statusMenu">

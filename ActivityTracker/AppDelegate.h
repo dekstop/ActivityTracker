@@ -12,14 +12,22 @@
     IBOutlet NSMenu *statusMenu;
     NSStatusItem *statusItem;
     
-    BOOL isActive;
+    BOOL doRemind;
     NSTimeInterval reminderIntervalInSeconds;
-    IBOutlet NSMenuItem *isActiveMenuItem;
+    IBOutlet NSMenuItem *dontRemindMenuItem;
+    IBOutlet NSMenuItem *remindPeriod1MenuItem;
+    IBOutlet NSMenuItem *remindPeriod2MenuItem;
+    IBOutlet NSMenuItem *remindPeriod3MenuItem;
+    IBOutlet NSMenuItem *remindPeriod4MenuItem;
     IBOutlet NSMenuItem *launchOnStartupMenuItem;
 }
 
-@property BOOL isActive;
-- (IBAction)toggleIsActive:(id)pId;
+@property BOOL doRemind;
+- (IBAction)selectDontRemind:(id)pId;
+- (IBAction)selectRemindPeriod1:(id)pId;
+- (IBAction)selectRemindPeriod2:(id)pId;
+- (IBAction)selectRemindPeriod3:(id)pId;
+- (IBAction)selectRemindPeriod4:(id)pId;
 - (IBAction)toggleLaunchOnStartup:(id)pId;
 - (IBAction)trackNow:(id)pId;
 - (IBAction)openLog:(id)pId;

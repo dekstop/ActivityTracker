@@ -12,7 +12,7 @@
 
 @implementation AppDelegate
 
-@synthesize isActive;
+@synthesize doRemind;
 NSAttributedString *menuTitleActive = nil;
 NSAttributedString *menuTitleInactive = nil;
 
@@ -34,22 +34,58 @@ NSFileHandle *logFile;
         logFile = OpenUserLog(logFilePath);
         
         menuTitleActive = [[NSMutableAttributedString alloc] initWithString:@"A" attributes:@{NSForegroundColorAttributeName:[NSColor blackColor], NSFontAttributeName:[NSFont systemFontOfSize:14.0]}];
-        menuTitleInactive = [[NSMutableAttributedString alloc] initWithString:@"A" attributes:@{NSForegroundColorAttributeName:[NSColor grayColor], NSFontAttributeName:[NSFont systemFontOfSize:14.0]}];
+        menuTitleInactive = [[NSMutableAttributedString alloc] initWithString:@"A" attributes:@{NSForegroundColorAttributeName:[NSColor darkGrayColor], NSFontAttributeName:[NSFont systemFontOfSize:14.0]}];
     }
     return self;
 }
 
-- (IBAction)toggleIsActive:(id)pId
+- (IBAction)selectDontRemind:(id)pId
 {
-    isActive = !isActive;
-    [[NSUserDefaults standardUserDefaults] setBool:isActive forKey:@"isActive"];
-    [self updateIsActiveDisplay];
+    doRemind = NO;
+    [self updateMenuDisplay];
+    [self updateAppSettings];
 }
 
-- (void)updateIsActiveDisplay
+- (IBAction)selectRemindPeriod1:(id)pId
 {
-    [isActiveMenuItem setState:(isActive ? NSOnState : NSOffState)];
-    [statusItem setAttributedTitle:(isActive ? menuTitleActive : menuTitleInactive)];
+    [self _setReminderInterval:30*60];
+}
+
+- (IBAction)selectRemindPeriod2:(id)pId
+{
+    [self _setReminderInterval:60*60];
+}
+
+- (IBAction)selectRemindPeriod3:(id)pId
+{
+    [self _setReminderInterval:90*60];
+}
+
+- (IBAction)selectRemindPeriod4:(id)pId
+{
+    [self _setReminderInterval:120*60];
+}
+
+- (void)_setReminderInterval:(int)seconds
+{
+    doRemind = YES;
+    if (reminderIntervalInSeconds > seconds) {
+        // Reschedule the next reminder if we're now on a shorter interval
+        [self scheduleReminderNotificationAfter:seconds];
+    }
+    reminderIntervalInSeconds = seconds;
+    [self updateMenuDisplay];
+    [self updateAppSettings];
+}
+
+- (void)updateMenuDisplay
+{
+    [statusItem setAttributedTitle:(doRemind ? menuTitleActive : menuTitleInactive)];
+    [dontRemindMenuItem setState:(doRemind ? NSOffState : NSOnState)];
+    [remindPeriod1MenuItem setState:(doRemind && reminderIntervalInSeconds==(30*60) ? NSOnState : NSOffState)];
+    [remindPeriod2MenuItem setState:(doRemind && reminderIntervalInSeconds==(60*60) ? NSOnState : NSOffState)];
+    [remindPeriod3MenuItem setState:(doRemind && reminderIntervalInSeconds==(90*60) ? NSOnState : NSOffState)];
+    [remindPeriod4MenuItem setState:(doRemind && reminderIntervalInSeconds==(120*60) ? NSOnState : NSOffState)];
 }
 
 - (IBAction)trackNow:(id)pId
@@ -87,7 +123,7 @@ NSFileHandle *logFile;
 {
     // App preferences
     [self registerDefaultAppSettings];
-    isActive = [[NSUserDefaults standardUserDefaults] boolForKey:@"isActive"];
+    doRemind = [[NSUserDefaults standardUserDefaults] boolForKey:@"doRemind"];
     reminderIntervalInSeconds = [[NSUserDefaults standardUserDefaults] integerForKey:@"reminderIntervalInSeconds"];
     NSLog(@"Reminder interval: %f", reminderIntervalInSeconds);
     [allActivities addObjectsFromArray:[[NSUserDefaults standardUserDefaults] arrayForKey:@"allActivities"]];
@@ -100,7 +136,7 @@ NSFileHandle *logFile;
     statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     [statusItem setMenu:statusMenu];
     [statusItem setHighlightMode:YES];
-    [self updateIsActiveDisplay];
+    [self updateMenuDisplay];
     
     // Register global keyboard shortcut -- may require assistive device access.
     [NSEvent addGlobalMonitorForEventsMatchingMask:NSKeyDownMask handler:^(NSEvent *event){
@@ -123,7 +159,7 @@ NSFileHandle *logFile;
 - (void)registerDefaultAppSettings
 {
     NSDictionary *appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
-                                 @"YES", @"isActive",
+                                 @"YES", @"doRemind",
                                  [NSNumber numberWithInt:(30*60)], @"reminderIntervalInSeconds",
                                  [[NSArray alloc] init], @"allActivities",
                                  [[NSArray alloc] init], @"previousActivity",
@@ -134,7 +170,7 @@ NSFileHandle *logFile;
 - (void)updateAppSettings
 {
     NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-    [settings setBool:isActive forKey:@"isActive"];
+    [settings setBool:doRemind forKey:@"doRemind"];
     [settings setInteger:reminderIntervalInSeconds forKey:@"reminderIntervalInSeconds"];
     [settings setObject:[allActivities allObjects] forKey:@"allActivities"];
     [settings setObject:previousActivity forKey:@"previousActivity"];
