@@ -16,6 +16,8 @@
 NSAttributedString *menuTitleActive = nil;
 NSAttributedString *menuTitleInactive = nil;
 
+NSAlert *alert = nil;
+
 NSMutableSet *allActivities = nil;
 NSArray *previousActivity = nil;
 
@@ -217,7 +219,13 @@ NSFileHandle *logFile;
 
 - (NSArray*)askForCurrentActivityWithDefault:(NSArray*)defaultValue
 {
-    NSAlert *alert = [NSAlert alertWithMessageText:@"What are you currently doing?"
+    // Guard against having multiple dialogue windows open.
+    if (alert!=nil) {
+        // Return focus to open dialogue window, in case it is already open but hidden.
+        [[NSRunningApplication currentApplication] activateWithOptions:NSApplicationActivateIgnoringOtherApps];
+        return nil;
+    }
+    alert = [NSAlert alertWithMessageText:@"What are you currently doing?"
                                      defaultButton:@"Track"
                                    alternateButton:@"Cancel"
                                        otherButton:nil
@@ -231,16 +239,19 @@ NSFileHandle *logFile;
     [alert setAccessoryView:input];
     [input setTarget:alert];
     
-    NSInteger button = [alert runModal];
+    NSInteger responseButtonId = [alert runModal];
     [self loseApplicationFocus];
-
-    if (button == NSAlertDefaultReturn) {
+    
+    NSArray *result = nil;
+    if (responseButtonId == NSAlertDefaultReturn) {
         [input validateEditing];
-        [allActivities addObjectsFromArray:[input objectValue]]; // Update autocomplete history
-        return [input objectValue];
-    } else {
-        return nil;
+        result = [input objectValue];
+        [allActivities addObjectsFromArray:result]; // Update autocomplete history
     }
+
+    // Cleanup & return.
+    alert = nil;
+    return result;
 }
 
 // NSTokenFieldDelegate: autocomplete
