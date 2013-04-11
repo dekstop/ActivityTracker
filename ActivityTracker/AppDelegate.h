@@ -35,3 +35,11 @@
 - (IBAction)quit:(id)pId;
 
 @end
+
+/**
+ * Making private Cocoa APIs accessible.
+ */
+@interface NSUserNotificationCenter (Private)
+- (void)_removeAllDisplayedNotifications;
+- (void)_removeDisplayedNotification:(NSUserNotification *)notification;
+@end

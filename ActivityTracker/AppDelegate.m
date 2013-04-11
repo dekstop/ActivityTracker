@@ -204,6 +204,8 @@ NSFileHandle *logFile;
 
 - (void)doTrackCurrentActivity
 {
+    [self removeAllDisplayedNotifications]; // Discard any open notification bubbles.
+    
     NSArray *activity = [self askForCurrentActivityWithDefault:previousActivity];
     if (activity!=nil) {
         Log(@"%@", [activity componentsJoinedByString:@", "]);
@@ -287,6 +289,12 @@ NSFileHandle *logFile;
     for (NSUserNotification *notification in [center scheduledNotifications]) {
         [center removeScheduledNotification:notification];
     }
+}
+
+- (void)removeAllDisplayedNotifications
+{
+    // Note: this is calling a private API.
+    [[NSUserNotificationCenter defaultUserNotificationCenter] _removeAllDisplayedNotifications];
 }
 
 // NSUserNotificationCenterDelegate
