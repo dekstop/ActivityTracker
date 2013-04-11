@@ -1,3 +1,4 @@
+* bug: shortcut keys (select all, copy/paste, etc) don't work inside NSTokenField
 * make menu options work (reminder interval selection)
 * assign colours to tags (to e.g. distinguish activities and location tags)
 * show clickable list of previous tags
