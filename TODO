@@ -1,3 +1,9 @@
-* bug: shortcut keys (select all, copy/paste, etc) don't work inside NSTokenField
+Features:
 * assign colours to tags (to e.g. distinguish activities and location tags)
+* OR: customisable categories for describing current context, then show one NSTokenField for each category (e.g. "activity", "location", "mood", ...)
 * show clickable list of previous tags
+
+Bugs:
+* current reminder loop is interrupted when clicking "cancel" on NSUserNotification bubble. (Maybe an actual timer would be better.)
+* NSTokenField autocomplete doesn't get triggered when task dialogue is launched via the NSUserNotification bubble (no idea how this would happen)
+* shortcut keys (select all, copy/paste, etc) don't work inside NSTokenField
