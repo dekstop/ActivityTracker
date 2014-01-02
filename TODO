@@ -5,5 +5,6 @@ Features:
 
 Bugs:
 * current reminder loop is interrupted when clicking "cancel" on NSUserNotification bubble. (Maybe an actual timer would be better.)
+* "sleeping" for longer than reminder interval also seems to interrupt it. (Are there "wake-from-sleep" events we can catch?)
 * NSTokenField autocomplete doesn't get triggered when task dialogue is launched via the NSUserNotification bubble (no idea how this would happen)
 * shortcut keys (select all, copy/paste, etc) don't work inside NSTokenField
