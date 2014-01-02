@@ -218,7 +218,9 @@ NSFileHandle *logFile;
         previousActivity = activity;
         [self syncAppSettings]; // Write history to disk
     }
-    [self scheduleReminderNotificationAfter:reminderIntervalInSeconds]; // Schedule the next reminder
+    if (doRemind) {
+        [self scheduleReminderNotificationAfter:reminderIntervalInSeconds]; // Schedule the next reminder
+    }
 }
 
 - (NSArray*)askForCurrentActivityWithDefault:(NSArray*)defaultValue
