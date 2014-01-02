@@ -127,7 +127,6 @@ NSFileHandle *logFile;
     [self registerDefaultAppSettings];
     doRemind = [[NSUserDefaults standardUserDefaults] boolForKey:@"doRemind"];
     reminderIntervalInSeconds = [[NSUserDefaults standardUserDefaults] integerForKey:@"reminderIntervalInSeconds"];
-    NSLog(@"Reminder interval: %f", reminderIntervalInSeconds);
     [allActivities addObjectsFromArray:[[NSUserDefaults standardUserDefaults] arrayForKey:@"allActivities"]];
     previousActivity = [[NSUserDefaults standardUserDefaults] arrayForKey:@"previousActivity"];
     [self updateAppSettings];
@@ -152,7 +151,12 @@ NSFileHandle *logFile;
     
     // Notifications
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
-    [self scheduleReminderNotificationAfter:reminderIntervalInSeconds]; // Schedule the first reminder
+    if (doRemind) {
+        NSLog(@"Reminder interval: %f", reminderIntervalInSeconds);
+        [self scheduleReminderNotificationAfter:reminderIntervalInSeconds]; // Schedule the first reminder
+    } else {
+        NSLog(@"Automated reminders are turned off.");
+    }
 
     // Lose focus
     [self loseApplicationFocus]; // For some reason this gets ignored.
