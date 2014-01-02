@@ -26,3 +26,14 @@ https://github.com/dekstop/ActivityTracker
 Compile, run.
 
 Only tested with Xcode 4.6 on OS X 10.8
+
+
+== Troubleshooting: Access for Assistive Devices
+
+If the Global Keyboard Shortcut Doesn't Work: make sure to enable "Access for 
+Assistive Devices" in your system preferences.
+
+In OS X 10.9 Mavericks:
+* System Settings > Security & Privacy > Privacy Tab > Accessibility
+* Allow access for ActivityTracker
+* Restart the ActivityTracker application
